@@ -3,7 +3,6 @@ package com.generation.blogpessoal.repository;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
 import java.util.List;
 import java.util.Optional;
 
@@ -19,39 +18,52 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import com.generation.blogpessoal.model.Usuario;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+/* Indica que é uma Classe Spring Boot Testing. */
+// A environment caso a porta principal 8080 esteja ocupada, o Spring irá atribuir uma outra porta automaticamente
+@TestInstance(TestInstance.Lifecycle.PER_CLASS) // finalizou o teste ela fecha, pois para isso que ela funciona
 public class UsuarioRepositoryTest {
-    
-	@Autowired
+
+	@Autowired // injetado para persistir os objetos no Banco de dados de testes.
 	private UsuarioRepository usuarioRepository;
-	
+
 	@BeforeAll
-	void start(){
+	void start() { // apaga todos os dados da tabela e insere no Banco de dados de testes através
+					// do método .save()
 
 		usuarioRepository.deleteAll();
 
+		usuarioRepository.save(
+				new Usuario(0L, "João da Silva", "joao@email.com.br", "13465278", "https://i.imgur.com/h4t8loa.jpg"));
 
-	usuarioRepository.save(new Usuario(0L, "João da Silva","https://i.imgur.com/FETvs2O.jpg","13465278","joao@email.com.br"));
-	
-	usuarioRepository.save(new Usuario(0L, "Manuela da Silva","https://i.imgur.com/NtyGneo.jpg","13465278","manuela@email.com.br"));
-	
-	usuarioRepository.save(new Usuario(0L, "Adriana da Silva","https://i.imgur.com/mB3VM2N.jpg","13465278","adriana@email.com.br"));
+		usuarioRepository.save(new Usuario(0L, "Manuela da Silva", "manuela@email.com.br", "13465278",
+				"https://i.imgur.com/NtyGneo.jpg"));
 
-    usuarioRepository.save(new Usuario(0L, "Paulo Antunes", "https://i.imgur.com/JR7kUFU.jpg","13465278","paulo@email.com.br"));
-	
-		}
+		usuarioRepository.save(new Usuario(0L, "Adriana da Silva", "adriana@email.com.br", "13465278",
+				"https://i.imgur.com/5M2p5Wb.jpg"));
+
+		usuarioRepository.save(
+				new Usuario(0L, "Paulo Antunes", "paulo@email.com.br", "13465278", "https://i.imgur.com/FETvs20.jpg"));
+	}
 
 	@Test
 	@DisplayName("Retorna 1 usuario")
 	public void deveRetornarUmUsuario() {
 
 		Optional<Usuario> usuario = usuarioRepository.findByUsuario("joao@email.com.br");
-
 		assertTrue(usuario.get().getUsuario().equals("joao@email.com.br"));
 	}
 
-	
+	@Test
+	@DisplayName("Retorna 3 usuarios")
+	public void deveRetornarTresUsuarios() {
+
+		List<Usuario> listaDeUsuarios = usuarioRepository.findAllByNomeContainingIgnoreCase("Silva");
+
+		assertEquals(3, listaDeUsuarios.size());
+		
+		assertTrue(listaDeUsuarios.get(0).getNome().equals("João da Silva"));
+		assertTrue(listaDeUsuarios.get(1).getNome().equals("Manuela da Silva"));
+		assertTrue(listaDeUsuarios.get(2).getNome().equals("Adriana da Silva"));
 		
 	}
-	
-	
+}
